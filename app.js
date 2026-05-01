@@ -15,6 +15,9 @@ app.get('/tasks', (req, res) => {
 // GET /tasks/:id: Retrieve a specific task by its ID
 app.get('/tasks/:id', (req, res) => {
   const id = parseInt(req.params.id);
+  if (isNaN(id)) {
+    return res.status(400).json({ error: 'Invalid task ID' });
+  }
   const task = tasks.find(t => t.id === id);
   if (!task) {
     return res.status(404).json({ error: 'Task not found' });
@@ -28,7 +31,7 @@ app.post('/tasks', (req, res) => {
   if (!title || !description || completed === undefined) {
     return res.status(400).json({ error: 'Title, description, and completed are required' });
   }
-  const newId = Math.max(...tasks.map(t => t.id)) + 1;
+  const newId = tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
   const newTask = { id: newId, title, description, completed };
   tasks.push(newTask);
   res.status(201).json(newTask);
@@ -37,6 +40,9 @@ app.post('/tasks', (req, res) => {
 // PUT /tasks/:id: Update an existing task by its ID
 app.put('/tasks/:id', (req, res) => {
   const id = parseInt(req.params.id);
+  if (isNaN(id)) {
+    return res.status(400).json({ error: 'Invalid task ID' });
+  }
   const taskIndex = tasks.findIndex(t => t.id === id);
   if (taskIndex === -1) {
     return res.status(404).json({ error: 'Task not found' });
@@ -51,6 +57,9 @@ app.put('/tasks/:id', (req, res) => {
 // PATCH /tasks/:id: Partially update an existing task by its ID
 app.patch('/tasks/:id', (req, res) => {
   const id = parseInt(req.params.id);   
+  if (isNaN(id)) {
+    return res.status(400).json({ error: 'Invalid task ID' });
+  }
   const taskIndex = tasks.findIndex(t => t.id === id);
   if(taskIndex === -1) {
     return res.status(404).json({ error: 'Task not found' });
@@ -66,6 +75,9 @@ app.patch('/tasks/:id', (req, res) => {
 // DELETE /tasks/:id: Delete a task by its ID
 app.delete('/tasks/:id', (req, res) => {
   const id = parseInt(req.params.id);
+  if (isNaN(id)) {
+    return res.status(400).json({ error: 'Invalid task ID' });
+  }
   const taskIndex = tasks.findIndex(t => t.id === id);
   if (taskIndex === -1) {
     return res.status(404).json({ error: 'Task not found' });
