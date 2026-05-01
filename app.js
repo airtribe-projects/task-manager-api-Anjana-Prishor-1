@@ -12,7 +12,7 @@ app.get('/tasks', (req, res) => {
   let filteredTasks = tasks;
 
   // Optional query parameters for filtering
-  const { completed, title, limit, sort } = req.query;
+  const { completed, title, limit, sort, priority } = req.query;
 
   // Filter by completion status
   if (completed !== undefined) {
@@ -33,6 +33,9 @@ app.get('/tasks', (req, res) => {
       filteredTasks = filteredTasks.sort((a, b) => a.title.localeCompare(b.title));
     } else if (sort === 'id') {
       filteredTasks = filteredTasks.sort((a, b) => a.id - b.id);
+    } else if(sort === 'priority') {
+      const priorityOrder = { 'high': 1, 'medium': 2, 'low': 3 };
+      filteredTasks = filteredTasks.sort((a,b) => priorityOrder[a.priority.toLowerCase()] - priorityOrder[b.priority.toLowerCase()]);
     }
   }
 
@@ -44,6 +47,14 @@ app.get('/tasks', (req, res) => {
     } else {
       return res.status(400).json({ error: 'Invalid limit - must be a positive number' });
     }
+  }
+
+  if (priority) {
+    const validPriorities = ['low', 'medium', 'high'];      
+    if (!validPriorities.includes(priority.toLowerCase())) {
+      return res.status(400).json({ error: 'Invalid priority - must be low, medium, or high' });
+    }
+    filteredTasks = filteredTasks.filter(task => task.priority.toLowerCase() === priority.toLowerCase());
   }
 
   res.json(filteredTasks);
@@ -110,7 +121,6 @@ app.patch('/tasks/:id', (req, res) => {
     if (completed !== undefined) tasks[taskIndex].completed = completed;
     res.json(tasks[taskIndex]);
 });
-
 
 // DELETE /tasks/:id: Delete a task by its ID
 app.delete('/tasks/:id', (req, res) => {
