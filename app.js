@@ -75,15 +75,22 @@ app.get('/tasks/:id', (req, res) => {
 
 // POST /tasks: Create a new task
 app.post('/tasks', (req, res) => {
-  const { title, description, completed } = req.body;
+  const { title, description, completed, priority } = req.body;
 
   // Validate required fields (catches empty strings, null, undefined)
   if (!title || !description || completed === undefined) {
     return res.status(400).json({ error: 'Title, description, and completed are required and cannot be empty' });
   }
 
+  // Validate priority if provided
+  const validPriorities = ['low', 'medium', 'high'];
+  const taskPriority = priority || 'medium';
+  if (!validPriorities.includes(taskPriority.toLowerCase())) {
+    return res.status(400).json({ error: 'Invalid priority - must be low, medium, or high' });
+  }
+
   const newId = tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
-  const newTask = { id: newId, title, description, completed };
+  const newTask = { id: newId, title, description, completed, priority: taskPriority };
   tasks.push(newTask);
   res.status(201).json(newTask);
 });
@@ -98,10 +105,20 @@ app.put('/tasks/:id', (req, res) => {
   if (taskIndex === -1) {
     return res.status(404).json({ error: 'Task not found' });
   }
-  const { title, description, completed } = req.body;
+  const { title, description, completed, priority } = req.body;
+
+  // Validate priority if provided
+  if (priority !== undefined) {
+    const validPriorities = ['low', 'medium', 'high'];
+    if (!validPriorities.includes(priority.toLowerCase())) {
+      return res.status(400).json({ error: 'Invalid priority - must be low, medium, or high' });
+    }
+  }
+
   if (title !== undefined) tasks[taskIndex].title = title;
   if (description !== undefined) tasks[taskIndex].description = description;
   if (completed !== undefined) tasks[taskIndex].completed = completed;
+  if (priority !== undefined) tasks[taskIndex].priority = priority;
   res.json(tasks[taskIndex]);
 });
 
@@ -115,10 +132,20 @@ app.patch('/tasks/:id', (req, res) => {
   if(taskIndex === -1) {
     return res.status(404).json({ error: 'Task not found' });
   } 
-    const { title, description, completed } = req.body;
+    const { title, description, completed, priority } = req.body;
+
+    // Validate priority if provided
+    if (priority !== undefined) {
+      const validPriorities = ['low', 'medium', 'high'];
+      if (!validPriorities.includes(priority.toLowerCase())) {
+        return res.status(400).json({ error: 'Invalid priority - must be low, medium, or high' });
+      }
+    }
+
     if (title !== undefined) tasks[taskIndex].title = title;
     if (description !== undefined) tasks[taskIndex].description = description;
     if (completed !== undefined) tasks[taskIndex].completed = completed;
+    if (priority !== undefined) tasks[taskIndex].priority = priority;
     res.json(tasks[taskIndex]);
 });
 
